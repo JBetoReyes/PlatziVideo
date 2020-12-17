@@ -1,6 +1,15 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import webpack from 'webpack';
+import React from 'react';
+import { renderToString } from 'react-dom/server';
+import { Provider } from 'react-redux';
+import { createStore, compose } from 'redux';
+import { StaticRouter } from 'react-router-dom';
+import { renderRoutes } from 'react-router-config';
+import serverRoutes from '../frontend/routes/serverRoutes.js';
+import reducer from '../frontend/reducers';
+import initialState from '../frontend/initialState.js';
 
 dotenv.config();
 
@@ -23,21 +32,38 @@ if (env === 'development') {
   app.use(webpackHotMiddleware(compiler));
 }
 
+const setResponse = (html) => {
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Platzi Video</title>
+        <link href="assets/app.css" rel="stylesheet">
+      </head>
+      <body>
+        hello world 
+        <div id="app" >${html}</div>
+        <script src="assets/app.js" type="text/javascript"></script>
+      </body>
+    </html>
+  `;
+};
+
+const renderApp = (req, res) => {
+  const store = createStore(reducer, initialState);
+  const html = renderToString(
+    <Provider store={store}>
+      <StaticRouter location={req.url} context={{}}>
+        {renderRoutes(serverRoutes)}
+      </StaticRouter>
+    </Provider>
+  );
+
+  res.send(setResponse(html));
+};
+
 app.get('*', (req, res) => {
-  res.send(`
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <title>Platzi Video</title>
-      <link href="assets/app.css" rel="stylesheet">
-    </head>
-    <body>
-      hello world 
-      <div id="app" ></div>
-      <script src="assets/app.js" type="text/javascript"></script>
-    </body>
-  </html>
-  `);
+  renderApp(req, res);
 });
 
 app.listen(port, '0.0.0.0', (err) => {
