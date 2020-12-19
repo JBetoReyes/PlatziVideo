@@ -12,6 +12,7 @@ import reducer from '../frontend/reducers';
 import initialState from '../frontend/initialState.js';
 import { resolve } from 'path';
 import helmet from 'helmet';
+import getManifest  from './getManifest.js';
 
 dotenv.config();
 
@@ -32,19 +33,26 @@ if (env === 'development') {
   app.use(webpackDevMiddleware(compiler, serverConfig));
   app.use(webpackHotMiddleware(compiler));
 } else {
+  app.use((req, res, next) => {
+    if (!req.hashManifest) req.hashManifest = getManifest();
+    next()
+  });
   app.use(express.static(resolve(__dirname, 'public')));
   app.use(helmet());
   app.use(helmet.permittedCrossDomainPolicies());
   app.disable('x-powered-by');
 }
 
-const setResponse = (html, preloadedState) => {
+const setResponse = (html, preloadedState, manifest) => {
+  const mainStyles = manifest ? manifest['main.css'] : 'assets/app.css';
+  const mainJS = manifest ? manifest['main.js'] : 'assets/app.js';
+  const vendors = manifest ? manifest['vendors.js'] : 'assets/vendor.js';
   return `
     <!DOCTYPE html>
     <html>
       <head>
         <title>Platzi Video</title>
-        <link href="assets/app.css" rel="stylesheet">
+        <link href=${mainStyles} rel="stylesheet">
       </head>
       <body>
         hello world 
@@ -52,7 +60,8 @@ const setResponse = (html, preloadedState) => {
         <script>
           window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState).replace(/</g,'\\u003c')}
         </script>
-        <script src="assets/app.js" type="text/javascript"></script>
+        <script src=${mainJS} type="text/javascript"></script>
+        <script src=${vendors} type="text/javascript"></script>
       </body>
     </html>
   `;
@@ -69,7 +78,7 @@ const renderApp = (req, res) => {
     </Provider>
   );
 
-  res.send(setResponse(html, preloadedState));
+  res.send(setResponse(html, preloadedState, req.hashManifest));
 };
 
 app.get('*', (req, res) => {

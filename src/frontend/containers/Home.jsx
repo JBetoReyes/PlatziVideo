@@ -13,38 +13,34 @@ const Home = ({ myList, trends, originals }) => {
     <>
       <Header />
       <Search isHome />
-      {myList.length > 0 &&
-        <Categories title="Mi Lista">
+      {myList.length > 0 && (
+        <Categories title='Mi Lista'>
           <Carousel>
-            {myList.map(item =>
-              <CarouselItem 
-                key={item.id} 
+            {myList.map(item => (
+              <CarouselItem
+                key={item.id}
                 {...item}
                 isList
               />
-            )}
+            ))}
           </Carousel>
         </Categories>
-      }
-      <Categories title="Tendencias">
+      )}
+      <Categories title='Tendencias'>
         <Carousel>
-          {trends.map(item =>
-            <CarouselItem key={item.id} {...item} />
-          )}
+          {trends.map(item => <CarouselItem key={item.id} {...item} />)}
         </Carousel>
       </Categories>
-      <Categories title="Originales de Platzi Video">
+      <Categories title='Originales de Platzi Video'>
         <Carousel>
-          {originals.map(item =>
-            <CarouselItem key={item.id} {...item} />
-          )}
+          {originals.map(item => <CarouselItem key={item.id} {...item} />)}
         </Carousel>
       </Categories>
     </>
   );
-}
+};
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     myList: state.myList,
     trends: state.trends,

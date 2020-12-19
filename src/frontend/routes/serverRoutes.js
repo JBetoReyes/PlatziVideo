@@ -8,23 +8,23 @@ const routes = [
   {
     exact: true,
     path: '/',
-    component: Home
+    component: Home,
   }, {
     exact: true,
     path: '/login',
-    component: Login
+    component: Login,
   }, {
     exact: true,
     path: '/register',
-    component: Register
+    component: Register,
   }, {
     exact: true,
     path: '/player/:id',
-    component: Player
+    component: Player,
   }, {
     name: 'NotFound',
-    component: NotFound
-  }
+    component: NotFound,
+  },
 ];
 
 export default routes;
