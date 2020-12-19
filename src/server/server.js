@@ -10,6 +10,8 @@ import { renderRoutes } from 'react-router-config';
 import serverRoutes from '../frontend/routes/serverRoutes.js';
 import reducer from '../frontend/reducers';
 import initialState from '../frontend/initialState.js';
+import { resolve } from 'path';
+import helmet from 'helmet';
 
 dotenv.config();
 
@@ -17,7 +19,6 @@ const { ENV: env, PORT: port } = process.env;
 const app = express();
 
 if (env === 'development') {
-  console.log('Development config');
   const webpackConfig = require('../../webpack.config');
   const webpackDevMiddleware = require('webpack-dev-middleware');
   const webpackHotMiddleware = require('webpack-hot-middleware');
@@ -30,6 +31,11 @@ if (env === 'development') {
 
   app.use(webpackDevMiddleware(compiler, serverConfig));
   app.use(webpackHotMiddleware(compiler));
+} else {
+  app.use(express.static(resolve(__dirname, 'public')));
+  app.use(helmet());
+  app.use(helmet.permittedCrossDomainPolicies());
+  app.disable('x-powered-by');
 }
 
 const setResponse = (html, preloadedState) => {

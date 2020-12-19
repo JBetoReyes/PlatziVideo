@@ -74,4 +74,6 @@ yarn-error.log
 
 # Build
 dist/
-*.swp
+*.sw*
+
+src/server/public
